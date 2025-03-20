@@ -1,0 +1,20 @@
+import boto3
+import base64
+import json
+
+s3 = boto3.client('s3')
+bucket_name = 'your-bucket-name'
+
+def lambda_handler(event, context):
+    try:
+        file = s3.get_object(Bucket=bucket_name, Key='whiteboard.png')
+        image_data = base64.b64encode(file['Body'].read()).decode('utf-8')
+        return {
+            'statusCode': 200,
+            'body': json.dumps({'image': f'data:image/png;base64,{image_data}'})
+        }
+    except Exception as e:
+        return {
+            'statusCode': 500,
+            'body': json.dumps({'error': str(e)})
+        }
