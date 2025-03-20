@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Collaborative Whiteboard</title>
+  <style>
+    canvas {
+      border: 1px solid black;
+    }
+  </style>
+</head>
+<body>
+  <h1>Whiteboard</h1>
+  <canvas id="whiteboard" width="800" height="600"></canvas>
+  <button onclick="saveWhiteboard()">Save</button>
+  <button onclick="loadWhiteboard()">Load</button>
+  <script>
+    const canvas = document.getElementById('whiteboard');
+    const ctx = canvas.getContext('2d');
+    let drawing = false;
+
+    canvas.addEventListener('mousedown', () => (drawing = true));
+    canvas.addEventListener('mouseup', () => (drawing = false));
+    canvas.addEventListener('mousemove', (event) => {
+      if (!drawing) return;
+      const rect = canvas.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+      ctx.fillRect(x, y, 2, 2); // Draw a point on the canvas
+    });
+
+    function saveWhiteboard() {
+      const data = canvas.toDataURL();
+      fetch('YOUR_BACKEND_ENDPOINT', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: data })
+      });
+      alert('Whiteboard saved!');
+    }
+
+    function loadWhiteboard() {
+      fetch('YOUR_BACKEND_ENDPOINT')
+        .then(response => response.json())
+        .then(data => {
+          const img = new Image();
+          img.onload = () => ctx.drawImage(img, 0, 0);
+          img.src = data.image;
+        });
+    }
+  </script>
+</body>
+</html>
